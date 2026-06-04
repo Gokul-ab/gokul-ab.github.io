@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gokul A B — Backend Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #1f1f1f;
+    --accent: #c8f135;
+    --accent2: #35f1c8;
+    --text: #e8e6e0;
+    --muted: #666;
+    --card: #111111;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.3;
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    position: relative;
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -80px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(200,241,53,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-summary {
+    max-width: 480px;
+    margin-top: 24px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #999;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  .header-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.45s;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .contact-item:hover { color: var(--accent); }
+
+  .contact-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ---- LAYOUT ---- */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 60px 100px;
+  }
+
+  section {
+    margin-top: 80px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  section:nth-child(1) { animation-delay: 0.5s; }
+  section:nth-child(2) { animation-delay: 0.6s; }
+  section:nth-child(3) { animation-delay: 0.7s; }
+  section:nth-child(4) { animation-delay: 0.8s; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ---- SKILLS ---- */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2px;
+  }
+
+  .skill-group {
+    background: var(--card);
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skill-group::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease;
+  }
+
+  .skill-group:hover::before { height: 100%; }
+  .skill-group:hover { background: #181818; border-color: #2a2a2a; }
+
+  .skill-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: #bbb;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.15s;
+  }
+
+  .tag:hover {
+    background: rgba(200,241,53,0.08);
+    border-color: rgba(200,241,53,0.3);
+    color: var(--accent);
+  }
+
+  /* ---- EXPERIENCE ---- */
+  .experience-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .exp-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .exp-header {
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .exp-header:hover { background: #181818; }
+
+  .exp-role {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .exp-company {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .exp-meta {
+    text-align: right;
+  }
+
+  .exp-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .exp-location {
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+  }
+
+  .exp-toggle {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 18px;
+    transition: transform 0.3s, color 0.2s;
+  }
+
+  .exp-card.open .exp-toggle {
+    transform: translateY(-50%) rotate(45deg);
+    color: var(--accent);
+  }
+
+  .exp-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .exp-card.open .exp-body { max-height: 1000px; }
+
+  .exp-bullets {
+    padding: 0 32px 32px;
+    border-top: 1px solid var(--border);
+    list-style: none;
+    margin-top: 0;
+  }
+
+  .exp-bullets li {
+    padding: 12px 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #aaa;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .exp-bullets li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 12px;
+    top: 13px;
+  }
+
+  .exp-bullets li strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ---- EDUCATION ---- */
+  .edu-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .edu-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .edu-card:hover::after { transform: scaleX(1); }
+
+  .edu-degree {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+
+  .edu-school {
+    font-size: 14px;
+    color: #888;
+  }
+
+  .edu-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .footer-name { color: var(--accent); }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    header { padding: 50px 24px 40px; grid-template-columns: 1fr; }
+    .header-contact { align-items: flex-start; }
+    main { padding: 0 24px 80px; }
+    footer { padding: 30px 24px; flex-direction: column; gap: 8px; }
+    .exp-header { grid-template-columns: 1fr; }
+    .exp-meta { text-align: left; }
+    .exp-toggle { top: 28px; transform: none; }
+    .exp-card.open .exp-toggle { transform: rotate(45deg); }
+    .edu-card { grid-template-columns: 1fr; }
+    .edu-period { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <p class="header-tag">Available for opportunities</p>
+    <h1>Gokul <em>A B</em></h1>
+    <p class="header-summary">
+      Backend Engineer with 3+ years building distributed systems using Go and Python.
+      Experienced in Kubernetes, Kafka, and scalable architectures, with a focus on
+      reliability and observability.
+    </p>
+  </div>
+  <div class="header-contact">
+    <a href="mailto:gokul-ab@outlook.com" class="contact-item">
+      <span class="contact-dot"></span>
+      gokul-ab@outlook.com
+    </a>
+    <a href="tel:+918138813776" class="contact-item">
+      <span class="contact-dot"></span>
+      +91 8138813776
+    </a>
+    <a href="https://linkedin.com/in/gokul-ashok" target="_blank" class="contact-item">
+      <span class="contact-dot"></span>
+      linkedin.com/in/gokul-ashok
+    </a>
+    <span class="contact-item">
+      <span class="contact-dot"></span>
+      India
+    </span>
+  </div>
+</header>
+
+<main>
+
+  <!-- SKILLS -->
+  <section>
+    <p class="section-label">Skills</p>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <p class="skill-category">Programming & Scripting</p>
+        <div class="skill-tags">
+          <span class="tag">Python</span>
+          <span class="tag">Go</span>
+          <span class="tag">Bash</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">Backend & Frameworks</p>
+        <div class="skill-tags">
+          <span class="tag">FastAPI</span>
+          <span class="tag">Django</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">Databases & Storage</p>
+        <div class="skill-tags">
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">MongoDB</span>
+          <span class="tag">Redis</span>
+          <span class="tag">ArangoDB</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">DevOps & Infrastructure</p>
+        <div class="skill-tags">
+          <span class="tag">Docker</span>
+          <span class="tag">Kubernetes</span>
+          <span class="tag">Nomad</span>
+          <span class="tag">DC/OS</span>
+          <span class="tag">Linux</span>
+          <span class="tag">AWS</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">Logging & Monitoring</p>
+        <div class="skill-tags">
+          <span class="tag">Elasticsearch</span>
+          <span class="tag">Kibana</span>
+          <span class="tag">Fluentd</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">Messaging & Streaming</p>
+        <div class="skill-tags">
+          <span class="tag">Kafka</span>
+          <span class="tag">RabbitMQ</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <p class="skill-category">Architecture & Concepts</p>
+        <div class="skill-tags">
+          <span class="tag">Microservices</span>
+          <span class="tag">CI/CD</span>
+          <span class="tag">Git</span>
+          <span class="tag">Branching Strategies</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section>
+    <p class="section-label">Experience</p>
+    <div class="experience-list">
+
+      <div class="exp-card open">
+        <div class="exp-header" onclick="toggleCard(this)">
+          <div>
+            <p class="exp-role">Software Engineer</p>
+            <p class="exp-company">Turbolab Technologies Private Limited</p>
+          </div>
+          <div class="exp-meta">
+            <p class="exp-period">02/2025 — Present</p>
+            <p class="exp-location">Kochi, India</p>
+          </div>
+          <span class="exp-toggle">+</span>
+        </div>
+        <div class="exp-body">
+          <ul class="exp-bullets">
+            <li>Engineered a <strong>hybrid HPA + VPA autoscaler in Go</strong>, eliminating scaling bottlenecks and improving application stability and resource utilization.</li>
+            <li>Built an <strong>LLM-powered review analysis system</strong> to map customer feedback to product components, improving insight extraction and reducing manual effort.</li>
+            <li>Designed a <strong>distributed web crawler</strong> with dynamic scaling using Kubernetes (HPA, Headless Services) and gRPC, improving CPU efficiency by ~10%.</li>
+            <li>Developed a <strong>custom Kubernetes operator</strong> to enable dynamic scaling without pod restarts, reducing service disruption.</li>
+            <li>Architected a <strong>Kafka-based queueing system with exactly-once semantics</strong>, ensuring near-100% delivery guarantees.</li>
+            <li>Migrated metrics collection from a Redis push model to a <strong>Prometheus pull-based system</strong>, improving observability and reliability.</li>
+            <li>Built a <strong>Django-based orchestration system using DAG architecture</strong> to coordinate multiple services via event streams and APIs.</li>
+            <li>Led feasibility analysis for migrating from Mesos to Kubernetes, identifying key trade-offs for a simpler, more scalable orchestration approach.</li>
+            <li>Refactored a Mesos scheduler using the <strong>State Design Pattern</strong>, improving maintainability and extensibility.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-card">
+        <div class="exp-header" onclick="toggleCard(this)">
+          <div>
+            <p class="exp-role">Associate Software Engineer</p>
+            <p class="exp-company">Turbolab Technologies Private Limited</p>
+          </div>
+          <div class="exp-meta">
+            <p class="exp-period">11/2023 — 02/2025</p>
+            <p class="exp-location">Kochi, India</p>
+          </div>
+          <span class="exp-toggle">+</span>
+        </div>
+        <div class="exp-body">
+          <ul class="exp-bullets">
+            <li>Developed and deployed a <strong>Fluentd plugin (Nomad system job)</strong> to enrich logs with service metadata, reducing logging resource usage by 40%.</li>
+            <li>Led development of a <strong>web scraping framework (Python + Django)</strong> that centralized workflows and reduced maintenance effort by over 75%.</li>
+            <li>Re-architected crawler concurrency from async to <strong>multiprocessing-based parallelism</strong>, improving reliability and simplifying debugging.</li>
+            <li>Co-developed a <strong>custom Mesos scheduler framework</strong> to improve task orchestration and resource utilization.</li>
+            <li>Designed a <strong>progressive rollout platform</strong> for critical components, enabling zero-downtime releases.</li>
+            <li>Optimized build pipelines using <strong>multi-stage Docker builds</strong>, reducing build time and improving efficiency.</li>
+            <li>Integrated <strong>GitLab CI/CD pipelines</strong> into existing projects, improving deployment automation and consistency.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-card">
+        <div class="exp-header" onclick="toggleCard(this)">
+          <div>
+            <p class="exp-role">Software Engineer Trainee</p>
+            <p class="exp-company">Turbolab Technologies Private Limited</p>
+          </div>
+          <div class="exp-meta">
+            <p class="exp-period">05/2023 — 11/2023</p>
+            <p class="exp-location">Kochi, India</p>
+          </div>
+          <span class="exp-toggle">+</span>
+        </div>
+        <div class="exp-body">
+          <ul class="exp-bullets">
+            <li>Designed and built a <strong>distributed web scraping platform</strong>, enabling scalable data extraction across multiple sources.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section>
+    <p class="section-label">Education</p>
+    <div class="edu-card">
+      <div>
+        <p class="edu-degree">B.Tech in Computer Science Engineering</p>
+        <p class="edu-school">Cochin University of Science and Technology — Kochi, India</p>
+      </div>
+      <div class="edu-period">08/2019 — 05/2023</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span><span class="footer-name">Gokul A B</span> — Backend / Distributed Systems</span>
+  <span>gokul-ab@outlook.com</span>
+</footer>
+
+<script>
+  function toggleCard(header) {
+    const card = header.closest('.exp-card');
+    card.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
